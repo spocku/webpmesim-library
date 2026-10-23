@@ -2,7 +2,7 @@
 
 > **Retro Sci-Fi Operations Archive & Interactive Mechanical Engineering Simulation Catalog**
 
-WEBPMESIM-library(Website Physics Math Engineering Simulator Library) A browser-native repository dashboard built in the **webpmesim** retro-futuristic CAD/CRT aesthetic (inspired by retro crt tactical command consoles, vintage vector monitors, and engineering blueprints). It indexes, categorizes, stores, inspects, and launches standalone HTML physics & engineering simulations locally without external backend dependencies.
+WEBPMESIM-library(Website Physics Math Engineering Simulator Library) A browser-native repository dashboard built in the **webpmesim** retro-futuristic CAD/CRT aesthetic (inspired by retro crt tactical command consoles, vintage vector monitors, and engineering blueprints). It indexes, categorizes, stores, inspects, and launches standalone HTML physics & engineering simulations locally without external backend dependencies. This library will be updated as i make more pre-baked mechanical systems, which will help me understand core concepts by visualizing.
 
 Live deployment: **[https://spocku.github.io/webpmesim-library/](https://spocku.github.io/webpmesim-library/)**
 
@@ -33,23 +33,8 @@ Switch between themes instantly via the top telemetry HUD:
 - **Sort Controls**: Sort items by recently added, alphabetical order, or mechanical parts count.
 
 
-### 🚀 Pre-Installed Core Simulation Units
-The repository includes three high-fidelity physics & engineering simulation models ready to run out of the box:
-
-1. **Slider-Crank Mechanism** (`slider-crank` // Mechanisms):
-   - Exact kinematics and inertial dynamics of an in-line crank, connecting rod and reciprocating piston.
-   - Governing relation: $$x(\theta) = r\cos\theta + \sqrt{l^2 - r^2\sin^2\theta}$$
-   - Features: pin double-shear analysis, connecting rod obliquity angle $\varphi$, exact kinematic derivatives, and 8/8 independent numerical validation checks.
-
-2. **Ninety-Degree V4 Reciprocating Engine** (`v4-engine` // Engines):
-   - Kinematic geometry, multi-cylinder inertial dynamics, and primary/secondary balancing.
-   - Governing relation: $$\sum_{i=1}^4 \mathbf{F}_{1,i} \equiv \mathbf{0},\quad F_{x,2}(\theta) = -2\sqrt{2}\,m_r r \omega^2 \lambda \sin 2\theta$$
-   - Features: 15 mechanical parts, $180^\circ$ flat-plane crankshaft with two shared crankpins, full primary reciprocating shaking force cancellation, second-order horizontal shaking analysis, and 8/8 validation checks.
-
-3. **Wankel Rotary Engine** (`wankel-engine` // Rotary):
-   - Epitrochoid kinematics, thermodynamic chamber volume cycles, apex seal dynamics, indicated gas torque, and dynamic balancing.
-   - Governing relation: $$V(\theta) = e R B\left(2\sqrt{3} - \frac{3\sqrt{3}}{2}\sin\left(\frac{2\theta}{3}\right)\right)$$
-   - Features: 2-lobed epitrochoid stator housing, triangular rotor with $1:3$ gear kinematics, four-stroke cycle over $1080^\circ$ shaft rotation, apex seal centrifugal liftoff and Hertzian contact stresses, and 8/8 validation checks.
+### Pre-Installed Core Simulation Units
+The repository includes three high-fidelity physics & engineering simulation models ready to run out of the box.
 ---
 
 ## Live Demo & Quick Start

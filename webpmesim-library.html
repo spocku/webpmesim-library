@@ -828,6 +828,7 @@ html[data-theme="crt"] .wp-footer {
         + LOAD HTML FILES
         <input type="file" id="batch-file-input" accept=".html,.htm" multiple style="display:none;">
       </label>
+      <button class="wp-tbtn" id="btn-restore-core" onclick="restoreDefaults()" title="Ensure core simulation models are present">RESTORE CORE</button>
     </div>
 
     <div class="wp-tgroup" style="margin-left:auto;">
@@ -1070,6 +1071,238 @@ function getHtmlFromDB(id) {
   });
 }
 
+// Built-in Core Engineering Simulations Repository
+const DEFAULT_SIMULATIONS = [
+  {
+    id: "slider-crank",
+    title: "Slider-Crank Mechanism",
+    subtitle: "Exact kinematics and inertial dynamics of an in-line crank, connecting rod and piston",
+    category: "mechanisms",
+    url: "slider-crank-webpmesim/slider-crank-webpmesim.html",
+    fileUrl: "C:/Users/bharh/Desktop/slider-crank-webpmesim/slider-crank-webpmesim.html",
+    scope: "The exact kinematics of an in-line slider-crank and the inertia force and crank torque produced by its reciprocating mass at constant crank speed.",
+    equation: "x(\\theta) = r\\cos\\theta + \\sqrt{l^2 - r^2\\sin^2\\theta}",
+    parts: 4,
+    checks: "8/8 PASS",
+    material: "42CrMo4 / Nitrided Forged Steel",
+    solver: "Exact Kinematic & Inertial Loop",
+    date: "2026-10-23",
+    tags: ["slider-crank", "kinematics", "reciprocating", "mechanisms", "inertia-torque", "piston", "rod", "crank"],
+    svg: `<svg viewBox="0 0 240 110" class="wp-schematic-svg">
+      <line x1="20" y1="55" x2="220" y2="55" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="55" y1="20" x2="55" y2="90" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <circle cx="55" cy="55" r="26" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+      <line x1="145" y1="38" x2="215" y2="38" stroke="var(--border-hi)" stroke-width="1.8"/>
+      <line x1="145" y1="72" x2="215" y2="72" stroke="var(--border-hi)" stroke-width="1.8"/>
+      <path d="M155,38 l-6,-8 M170,38 l-6,-8 M185,38 l-6,-8 M200,38 l-6,-8 M215,38 l-6,-8" stroke="var(--text-dim)" stroke-width="1" opacity="0.6"/>
+      <path d="M155,72 l-6,8 M170,72 l-6,8 M185,72 l-6,8 M200,72 l-6,8 M215,72 l-6,8" stroke="var(--text-dim)" stroke-width="1" opacity="0.6"/>
+      <rect x="156" y="41" width="34" height="28" rx="2" fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="1.8"/>
+      <line x1="162" y1="44" x2="162" y2="66" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="167" y1="44" x2="167" y2="66" stroke="var(--rule)" stroke-width="1"/>
+      <line x1="76" y1="39" x2="173" y2="55" stroke="var(--wire-2, var(--accent))" stroke-width="3" stroke-linecap="round"/>
+      <line x1="55" y1="55" x2="76" y2="39" stroke="var(--wire-1)" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="55" cy="55" r="4.5" fill="var(--accent)" stroke="var(--bg)" stroke-width="1.5"/>
+      <circle cx="76" cy="39" r="3.5" fill="var(--data)" stroke="var(--bg)" stroke-width="1"/>
+      <circle cx="173" cy="55" r="3.5" fill="var(--data)" stroke="var(--bg)" stroke-width="1"/>
+      <line x1="147" y1="88" x2="199" y2="88" stroke="var(--geo)" stroke-width="1"/>
+      <path d="M147,85 v6 M199,85 v6" stroke="var(--geo)" stroke-width="1"/>
+      <text x="173" y="99" fill="var(--geo)" font-size="8.5" font-family="var(--f-mono)" text-anchor="middle">STROKE s=2r</text>
+      <text x="55" y="100" fill="var(--text-dim)" font-size="8.5" font-family="var(--f-mono)" text-anchor="middle">CRANK r</text>
+    </svg>`,
+    dossier: {
+      overview: "Detailed mechanical principles of an in-line slider-crank mechanism converting rotational crank shaft velocity into reciprocating linear piston motion. The solver accounts for exact geometric non-linearities, higher-order harmonics, connecting rod obliquity angle φ, pin double-shear stresses, and virtual-work inertial torque balance without Taylor series approximations.",
+      math: [
+        { title: "Exact Piston Position", tex: "x(\\theta) = r\\cos\\theta + \\sqrt{l^2 - r^2\\sin^2\\theta}" },
+        { title: "Slider Linear Velocity", tex: "v(\\theta) = -r\\omega\\left(\\sin\\theta + \\frac{r\\sin 2\\theta}{2\\sqrt{l^2 - r^2\\sin^2\\theta}}\\right)" },
+        { title: "Slider Linear Acceleration", tex: "a(\\theta) \\approx -r\\omega^2(\\cos\\theta + \\lambda\\cos 2\\theta),\\quad \\lambda = \\frac{r}{l}" },
+        { title: "Reciprocating Inertia Force", tex: "F(\\theta) = m_r \\cdot a(\\theta)" },
+        { title: "Crank Inertial Torque (Virtual Work)", tex: "T(\\theta) = -F(\\theta)\\cdot \\frac{r\\sin(\\theta+\\varphi)}{\\cos\\varphi}" }
+      ],
+      applications: [
+        "Internal combustion engines and reciprocating gas compressors: fundamental mechanism converting continuous rotation to linear displacement.",
+        "Reciprocating positive-displacement pumps, hydraulic presses, and mechanical shaping machines.",
+        "Engine balancing and vibration mitigation: isolating primary cos θ and secondary cos 2θ shaking forces."
+      ],
+      specs: [
+        { label: "Crank Radius (r)", val: "20 – 60 mm (default 40 mm)" },
+        { label: "Connecting Rod (l)", val: "100 – 240 mm (default 140 mm)" },
+        { label: "Crankshaft Speed (n)", val: "60 – 6,000 rpm" },
+        { label: "Reciprocating Mass (mr)", val: "0.1 – 3.0 kg (default 0.6 kg)" },
+        { label: "Rod Ratio (λ = r/l)", val: "0.286 nominal (≤ 0.40 max)" },
+        { label: "Allowable Pin Shear", val: "60 MPa (double shear)" }
+      ],
+      checks: [
+        { title: "Velocity equals numerical derivative of position", tol: "1e-6 m/s" },
+        { title: "Acceleration equals numerical derivative of velocity", tol: "1e-3 m/s²" },
+        { title: "Stroke length equals twice the crank radius (s = 2r)", tol: "1e-9 mm" },
+        { title: "Maximum rod obliquity equals arcsin(r/l)", tol: "1e-6 rad" },
+        { title: "Virtual-work torque equals geometric rod-force torque", tol: "1e-9 N·m" },
+        { title: "Inertia torque does zero net work per complete revolution", tol: "1e-6 J" },
+        { title: "Work done by torque equals change in kinetic energy", tol: "1e-6 J" },
+        { title: "Long-rod limit (λ → 0) reduces to pure harmonic motion", tol: "1e-4 rel" }
+      ]
+    }
+  },
+  {
+    id: "v4-engine",
+    title: "Ninety-Degree V4 Reciprocating Engine",
+    subtitle: "Kinematic geometry, multi-cylinder inertial dynamics and primary/secondary balancing",
+    category: "engines",
+    url: "v4-engine-webpmesim/v4-engine-webpmesim.html",
+    fileUrl: "C:/Users/bharh/Desktop/v4-engine-webpmesim/v4-engine-webpmesim.html",
+    scope: "The exact kinematics, multi-cylinder inertial dynamics and primary/secondary balancing of a ninety-degree V4 engine with flat-plane crankshaft.",
+    equation: "\\sum_{i=1}^4 \\mathbf{F}_{1,i} \\equiv 0,\\quad F_{x,2}(\\theta) = -2\\sqrt{2}\\,m_r r \\omega^2 \\lambda \\sin 2\\theta",
+    parts: 15,
+    checks: "8/8 PASS",
+    material: "Forged 42CrMo4 / EN AC-42000-T6",
+    solver: "Multi-Cylinder Dynamic Loop",
+    date: "2026-10-23",
+    tags: ["v4-engine", "multi-cylinder", "balancing", "crankshaft", "secondary-shake", "engines", "pistons", "powertrain"],
+    svg: `<svg viewBox="0 0 240 110" class="wp-schematic-svg">
+      <line x1="120" y1="15" x2="120" y2="105" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="30" y1="82" x2="210" y2="82" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="120" y1="82" x2="52" y2="14" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="120" y1="82" x2="188" y2="14" stroke="var(--rule)" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M100,62 A 28 28 0 0 1 140,62" fill="none" stroke="var(--data)" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <text x="120" y="56" fill="var(--data)" font-size="8.5" font-family="var(--f-mono)" font-weight="bold" text-anchor="middle">90° V-BANK</text>
+      <circle cx="120" cy="82" r="16" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 2" fill="none"/>
+      <g transform="translate(120,82) rotate(-45) translate(-120,-82)">
+        <line x1="98" y1="18" x2="98" y2="60" stroke="var(--border-hi)" stroke-width="1.5"/>
+        <line x1="142" y1="18" x2="142" y2="60" stroke="var(--border-hi)" stroke-width="1.5"/>
+        <rect x="103" y="24" width="34" height="20" rx="1.5" fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="1.5"/>
+        <line x1="120" y1="34" x2="120" y2="68" stroke="var(--wire-2, var(--accent))" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="120" cy="34" r="2.5" fill="var(--data)"/>
+      </g>
+      <g transform="translate(120,82) rotate(45) translate(-120,-82)">
+        <line x1="98" y1="18" x2="98" y2="60" stroke="var(--border-hi)" stroke-width="1.5"/>
+        <line x1="142" y1="18" x2="142" y2="60" stroke="var(--border-hi)" stroke-width="1.5"/>
+        <rect x="103" y="28" width="34" height="20" rx="1.5" fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="1.5"/>
+        <line x1="120" y1="38" x2="120" y2="68" stroke="var(--wire-2, var(--accent))" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="120" cy="38" r="2.5" fill="var(--data)"/>
+      </g>
+      <circle cx="120" cy="82" r="6" fill="var(--accent)" stroke="var(--bg)" stroke-width="1.5"/>
+      <path d="M112,86 C112,98 128,98 128,86 Z" fill="var(--rule)" stroke="var(--wire-1)" stroke-width="1"/>
+      <text x="40" y="100" fill="var(--ok)" font-size="8" font-family="var(--f-mono)">ΣF₁ ≡ 0 (BALANCED)</text>
+      <text x="200" y="100" fill="var(--caution)" font-size="8" font-family="var(--f-mono)" text-anchor="end">4 CYL / FLAT-PLANE</text>
+    </svg>`,
+    dossier: {
+      overview: "Comprehensive multi-cylinder kinematic and dynamic simulation of a 90° V4 internal combustion engine with two cylinder banks at ±45° from vertical and a 180° flat-plane crankshaft. Proves the complete intrinsic vector cancellation of all primary reciprocating shaking forces, evaluates residual second-order horizontal shaking force Fx,2, and simulates total multi-cylinder crankshaft inertial torque fluctuation.",
+      math: [
+        { title: "Primary Shaking Force Cancellation", tex: "\\sum_{i=1}^4 \\mathbf{F}_{1,i} = \\sum_{i=1}^4 m_r r \\omega^2 \\cos\\theta_i \\,\\hat{\\mathbf{n}}_i \\equiv \\mathbf{0}" },
+        { title: "Secondary Horizontal Shaking Force", tex: "F_{x,2}(\\theta) = -2\\sqrt{2}\\,m_r r \\omega^2 \\lambda \\sin 2\\theta,\\quad F_{y,2}(\\theta) \\equiv 0" },
+        { title: "Cylinder Crank Angle Phasing", tex: "\\theta_{C1}=\\theta,\\ \\theta_{C2}=\\theta-90^\\circ,\\ \\theta_{C3}=\\theta-180^\\circ,\\ \\theta_{C4}=\\theta-270^\\circ" },
+        { title: "Individual Cylinder Displacement", tex: "s_i(\\theta_i) = r\\cos\\theta_i + \\sqrt{l^2 - r^2\\sin^2\\theta_i}" },
+        { title: "Net Crankshaft Inertia Torque", tex: "T_{\\text{net}}(\\theta) = \\sum_{i=1}^4 T_i(\\theta_i),\\quad \\oint T_{\\text{net}}\\,d\\theta \\equiv 0" }
+      ],
+      applications: [
+        "High-performance motorcycles (MotoGP, Ducati, Honda) and racing sports cars: ultra-compact frontal cross-section and short, stiff crankshaft.",
+        "Aviation and marine inboard power units requiring smooth primary balance without power-robbing balance shafts.",
+        "Advanced multi-cylinder powertrain engineering: optimizing firing intervals, crankpin torsional loads, and chassis NVH excitation."
+      ],
+      specs: [
+        { label: "Crank Radius (r)", val: "24 – 45 mm (default 32 mm)" },
+        { label: "Connecting Rod (l)", val: "90 – 160 mm (default 112 mm)" },
+        { label: "Crankshaft Speed (n)", val: "600 – 12,000 rpm" },
+        { label: "Piston Mass per Cyl (mr)", val: "0.15 – 1.20 kg (default 0.42 kg)" },
+        { label: "Cylinder Configuration", val: "4-Cylinder 90° V-Angle (2 Banks)" },
+        { label: "Crankshaft Configuration", val: "180° Flat-Plane (2 Shared Pins)" }
+      ],
+      checks: [
+        { title: "Velocity equals numerical derivative of displacement", tol: "1e-6 m/s" },
+        { title: "Acceleration equals numerical derivative of velocity", tol: "1e-3 m/s²" },
+        { title: "Total stroke equals twice the crank radius (s = 2r)", tol: "1e-9 mm" },
+        { title: "Peak rod angle equals arcsin of rod ratio (λ = r/l)", tol: "1e-6 rad" },
+        { title: "Virtual work torque equals geometric rod-force torque", tol: "1e-9 N·m" },
+        { title: "Primary reciprocating shaking forces cancel identically", tol: "1e-6 N" },
+        { title: "Total crankshaft inertia torque does zero net cycle work", tol: "1e-5 J" },
+        { title: "Infinite rod limit reduces to pure simple harmonic motion", tol: "1e-4 rel" }
+      ]
+    }
+  },
+  {
+    id: "wankel-engine",
+    title: "Wankel Rotary Engine",
+    subtitle: "Epitrochoid kinematics, thermodynamic chamber volume cycles, apex seal dynamics, indicated torque and dynamic balancing",
+    category: "rotary",
+    url: "wankel-engine-webpmesim/wankel-engine-webpmesim.html",
+    fileUrl: "C:/Users/bharh/Desktop/wankel-engine-webpmesim/wankel-engine-webpmesim.html",
+    scope: "The exact epitrochoid kinematics, thermodynamic chamber volume cycles, apex seal sliding velocities and accelerations, gas expansion indicated torque, and complete primary rotating inertia balance of a single-rotor Wankel rotary engine.",
+    equation: "V(\\theta) = e R B\\left(2\\sqrt{3} - \\frac{3\\sqrt{3}}{2}\\sin\\left(\\frac{2\\theta}{3}\\right)\\right)",
+    parts: 7,
+    checks: "8/8 PASS",
+    material: "EN-GJL-250 / Ti-6Al-4V / 42CrMo4",
+    solver: "Epitrochoidal & Thermodynamic Loop",
+    date: "2026-10-23",
+    tags: ["wankel", "rotary", "epitrochoid", "thermodynamics", "apex-seals", "combustion", "rotary-piston", "e-shaft"],
+    svg: `<svg viewBox="0 0 240 110" class="wp-schematic-svg">
+      <line x1="20" y1="55" x2="220" y2="55" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="120" y1="10" x2="120" y2="100" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <path d="M 172,55 C 172,74 154,92 136,92 C 126,92 120,84 120,84 C 120,84 114,92 104,92 C 86,92 68,74 68,55 C 68,36 86,18 104,18 C 114,18 120,26 120,26 C 120,26 126,18 136,18 C 154,18 172,36 172,55 Z"
+            fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="2"/>
+      <path d="M 180,55 C 180,79 160,98 136,98 C 126,98 120,91 120,91 C 120,91 114,98 104,98 C 80,98 60,79 60,55 C 60,31 80,12 104,12 C 114,12 120,19 120,19 C 120,19 126,12 136,12 C 160,12 180,31 180,55 Z"
+            fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3"/>
+      <path d="M 160,55 A 64 64 0 0 1 105,83 A 64 64 0 0 1 105,27 A 64 64 0 0 1 160,55 Z"
+            fill="rgba(56,189,248,0.12)" stroke="var(--wire-2, var(--accent))" stroke-width="1.8"/>
+      <circle cx="123.5" cy="55" r="14" stroke="var(--rule)" stroke-width="1" stroke-dasharray="2 2" fill="none"/>
+      <circle cx="120" cy="55" r="9" stroke="var(--geo)" stroke-width="1.2" stroke-dasharray="2 2" fill="none"/>
+      <circle cx="160" cy="55" r="2.5" fill="var(--data)" stroke="var(--bg)" stroke-width="0.8"/>
+      <circle cx="105" cy="83" r="2.5" fill="var(--data)" stroke="var(--bg)" stroke-width="0.8"/>
+      <circle cx="105" cy="27" r="2.5" fill="var(--data)" stroke="var(--bg)" stroke-width="0.8"/>
+      <circle cx="120" cy="55" r="4.5" fill="var(--accent)" stroke="var(--bg)" stroke-width="1"/>
+      <circle cx="123.5" cy="55" r="2.5" fill="var(--ok)"/>
+      <circle cx="70" cy="46" r="1.5" fill="var(--alert)"/>
+      <circle cx="70" cy="64" r="1.5" fill="var(--alert)"/>
+      <text x="120" y="105" fill="var(--text-dim)" font-size="8" font-family="var(--f-mono)" text-anchor="middle">EPITROCHOID 1:3 GEAR RATIO</text>
+      <text x="215" y="25" fill="var(--geo)" font-size="7.5" font-family="var(--f-mono)" text-anchor="end">3 CHAMBERS</text>
+      <text x="215" y="37" fill="var(--data)" font-size="7.5" font-family="var(--f-mono)" text-anchor="end">4-STROKE CYCLE</text>
+    </svg>`,
+    dossier: {
+      overview: "Rigorous mathematical formulation and dynamic simulation of the Wankel rotary engine. Accurately plots the two-lobed epitrochoid stator bore generated by an eccentric rotating circle, solves the 1:3 rotor-to-shaft gear kinematics, computes dynamic working chamber volume across four strokes over 1080° of eccentric shaft rotation, models apex seal kinematic accelerations and Hertzian contact stresses, and demonstrates complete primary static and dynamic rotor balance using dual counterweights.",
+      math: [
+        { title: "Parametric Epitrochoid Stator Surface", tex: "x(\\psi) = e\\cos 3\\psi + R\\cos\\psi,\\quad y(\\psi) = e\\sin 3\\psi + R\\sin\\psi" },
+        { title: "Chamber Swept Displacement Volume", tex: "V_d = 3\\sqrt{3}\\,e\\,R\\,B" },
+        { title: "Instantaneous Chamber Volume Cycle", tex: "V(\\theta) = V_c + \\frac{V_d}{2}\\left[1 - \\sin\\left(\\frac{2\\theta}{3}\\right)\\right]" },
+        { title: "Apex Seal Centrifugal & Tangential Acceleration", tex: "a_{\\text{apex}}(\\theta) = \\sqrt{\\ddot{x}^2 + \\ddot{y}^2},\\quad \\omega_{\\text{rotor}} = \\frac{1}{3}\\omega_e" },
+        { title: "Indicated Gas Expansion Torque", tex: "T_{\\text{ind}}(\\theta) = \\sum_{k=0}^2 \\left(P_k(\\theta) - P_{\\text{atm}}\\right)\\frac{dV_k}{d\\theta}" },
+        { title: "Dynamic Counterweight Balance Condition", tex: "\\vec{F}_{\\text{rotor}} + \\vec{F}_{\\text{cw1}} + \\vec{F}_{\\text{cw2}} = \\mathbf{0},\\quad \\sum z_i \\vec{F}_{\\text{cw},i} = \\mathbf{0}" }
+      ],
+      applications: [
+        "Aviation, aerospace UAVs, and racing sports cars: exceptional power-to-weight ratio (> 2.0 kW/kg) without reciprocating valvetrain.",
+        "Electric vehicle range-extenders (EREV / APU): ultra-smooth, vibration-free rotary operation in a compact package.",
+        "Alternative fuel combustion: ideal geometry for hydrogen direct injection due to physically separate intake and combustion zones.",
+        "Tribological research: high-speed apex seal sliding boundary lubrication and ceramic coating wear analysis."
+      ],
+      specs: [
+        { label: "Shaft Eccentricity (e)", val: "10 – 20 mm (default 15 mm)" },
+        { label: "Generating Radius (R)", val: "85 – 130 mm (default 105 mm)" },
+        { label: "Rotor Depth (B)", val: "55 – 105 mm (default 80 mm)" },
+        { label: "Apex Seal Radius (a)", val: "1.0 – 4.0 mm (default 2.0 mm)" },
+        { label: "Shaft Speed (n)", val: "600 – 9,000 rpm" },
+        { label: "Compression Ratio (ε)", val: "7.5 – 11.5 (default 9.0:1)" }
+      ],
+      checks: [
+        { title: "Swept volume conservation (|Vmax - Vmin - 3√3 e R B|)", tol: "1e-4 mm³" },
+        { title: "Analytic volume derivative equals numerical derivative", tol: "1e-3 mm³/rad" },
+        { title: "Apex seal trajectory remains on epitrochoid surface", tol: "1e-9 mm" },
+        { title: "Apex velocity analytic equals numeric derivative", tol: "1e-4 m/s" },
+        { title: "Apex acceleration analytic equals numeric second derivative", tol: "1e-2 m/s²" },
+        { title: "Virtual work torque equals geometric gas torque", tol: "1e-4 N·m" },
+        { title: "Primary centrifugal force equilibrium (rotor + counterweights)", tol: "1e-6 N" },
+        { title: "Primary pitching couple dynamic balance (moment equilibrium)", tol: "1e-6 N·m" }
+      ]
+    }
+  }
+];
+
+// Restore core system simulations
+function restoreDefaults() {
+  const defaultMap = new Map(DEFAULT_SIMULATIONS.map(s => [s.id, s]));
+  const customItems = simulations.filter(s => !defaultMap.has(s.id));
+  simulations = [...DEFAULT_SIMULATIONS, ...customItems];
+  saveLibrary();
+  renderCards();
+}
+
 // State management
 let simulations = [];
 let searchQuery = "";
@@ -1079,17 +1312,24 @@ let lastRegisteredId = null;
 // Initialize library
 async function initLibrary() {
   await initDB();
-
   const stored = localStorage.getItem("webpmesim_library_items");
   if (stored) {
     try {
-      simulations = JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const defaultMap = new Map(DEFAULT_SIMULATIONS.map(s => [s.id, s]));
+        const customItems = parsed.filter(s => !defaultMap.has(s.id));
+        simulations = [...DEFAULT_SIMULATIONS, ...customItems];
+      } else {
+        simulations = [...DEFAULT_SIMULATIONS];
+      }
     } catch (e) {
-      simulations = [];
+      simulations = [...DEFAULT_SIMULATIONS];
     }
   } else {
-    simulations = [];
+    simulations = [...DEFAULT_SIMULATIONS];
   }
+  saveLibrary();
 
   // Restore theme
   const savedTheme = localStorage.getItem("wp_theme") || "crt";
@@ -1441,7 +1681,7 @@ function renderCards() {
 
   // Render LaTeX math formulas
   if (window.renderMathInElement) {
-    renderMathInElement(grid, {
+    window.renderMathInElement(grid, {
       delimiters: [
         {left: '$$', right: '$$', display: true},
         {left: '$', right: '$', display: false}
@@ -1459,28 +1699,33 @@ function resetSearch() {
   renderCards();
 }
 
-// Launch simulation in new tab (supports IndexedDB blob or direct URL)
+// Launch simulation in new tab (supports direct relative URL and IndexedDB blob)
 async function launchDirect(id) {
   const sim = simulations.find(s => s.id === id);
   if (!sim) return;
 
+  // Prefer direct relative or local file URL
+  if (sim.url) {
+    let target = sim.url;
+    if (/^[A-Za-z]:[\\/]/.test(target)) {
+      target = "file:///" + target.replace(/\\/g, "/");
+    }
+    window.open(target, "_blank");
+    return;
+  }
+
+  // Fallback to IndexedDB Blob for uploaded files
   const storedHtml = await getHtmlFromDB(id);
   if (storedHtml) {
     const blob = new Blob([storedHtml], { type: "text/html" });
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, "_blank");
-    return;
+  } else {
+    alert("Simulation file content could not be located.");
   }
-
-  // Fallback to URL / path
-  let target = sim.url;
-  if (/^[A-Za-z]:[\\/]/.test(target)) {
-    target = "file:///" + target.replace(/\\/g, "/");
-  }
-  window.open(target, "_blank");
 }
 
-// Open In-Page CRT Simulation Runner Modal (Supports offline IndexedDB and paths)
+// Open In-Page CRT Simulation Runner Modal (Supports offline IndexedDB and direct URLs)
 async function openRunner(id) {
   const sim = simulations.find(s => s.id === id);
   if (!sim) return;
@@ -1492,25 +1737,33 @@ async function openRunner(id) {
 
   title.textContent = `SIMULATION RUNNER // ${sim.title.toUpperCase()}`;
 
-  const storedHtml = await getHtmlFromDB(id);
-  if (storedHtml) {
-    iframe.srcdoc = storedHtml;
-    popout.onclick = () => {
-      const blob = new Blob([storedHtml], { type: "text/html" });
-      window.open(URL.createObjectURL(blob), "_blank");
-    };
-  } else {
-    iframe.removeAttribute("srcdoc");
+  // Reset iframe state
+  iframe.removeAttribute("srcdoc");
+  iframe.src = "about:blank";
+
+  if (sim.url) {
     let target = sim.url;
     if (/^[A-Za-z]:[\\/]/.test(target)) {
       target = "file:///" + target.replace(/\\/g, "/");
     }
     iframe.src = target;
     popout.onclick = () => window.open(target, "_blank");
+  } else {
+    const storedHtml = await getHtmlFromDB(id);
+    if (storedHtml) {
+      iframe.srcdoc = storedHtml;
+      popout.onclick = () => {
+        const blob = new Blob([storedHtml], { type: "text/html" });
+        window.open(URL.createObjectURL(blob), "_blank");
+      };
+    } else {
+      popout.onclick = null;
+    }
   }
 
   modal.classList.add("is-open");
 }
+
 
 function closeRunner() {
   const modal = document.getElementById("modal-runner");
@@ -1520,7 +1773,7 @@ function closeRunner() {
   modal.classList.remove("is-open");
 }
 
-// Open Dossier / Notes Modal
+// Open Detailed Dossier Modal
 function openDossier(id) {
   const sim = simulations.find(s => s.id === id);
   if (!sim) return;
@@ -1535,17 +1788,17 @@ function openDossier(id) {
   content.innerHTML = `
     <div style="border-bottom:1px solid var(--border); padding-bottom:.75rem;">
       <h2 style="font:900 1.25rem/1.2 var(--f-head); letter-spacing:var(--head-track); color:var(--title); margin:0 0 .3rem;">${sim.title}</h2>
-      <div style="font-size:.78rem; color:var(--text-dim);">${sim.subtitle || ''}</div>
+      <div style="font-size:.78rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em;">${sim.subtitle || ''}</div>
     </div>
 
     <div>
       <h4 style="font:700 .72rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 .4rem;">EDUCATIONAL SCOPE</h4>
-      <p style="margin:0; font-size:.88rem; line-height:1.5;">${sim.scope}</p>
+      <p style="margin:0; font-size:.88rem; line-height:1.5; color:var(--text);">${sim.scope}</p>
     </div>
 
     <div>
       <h4 style="font:700 .72rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 .4rem;">SYSTEM OVERVIEW</h4>
-      <p style="margin:0; font-size:.88rem; line-height:1.5;">${d.overview || 'Exact physical mechanics and kinematics modelled from first principles.'}</p>
+      <p style="margin:0; font-size:.88rem; line-height:1.5; color:var(--text);">${d.overview || 'Exact physical mechanics and kinematics modelled from first principles.'}</p>
     </div>
 
     ${d.math && d.math.length ? `
@@ -1562,6 +1815,43 @@ function openDossier(id) {
       </div>
     ` : ''}
 
+    ${d.applications && d.applications.length ? `
+      <div>
+        <h4 style="font:700 .72rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 .4rem;">ENGINEERING APPLICATIONS</h4>
+        <ul style="margin:0; padding-left:1.2rem; font-size:.85rem; line-height:1.5; color:var(--text);">
+          ${d.applications.map(app => `<li style="margin-bottom:.35rem;">${app}</li>`).join('')}
+        </ul>
+      </div>
+    ` : ''}
+
+    ${d.specs && d.specs.length ? `
+      <div>
+        <h4 style="font:700 .72rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 .4rem;">KEY PARAMETERS &amp; CONSTRAINTS</h4>
+        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:.4rem;">
+          ${d.specs.map(s => `
+            <div style="background:var(--field); border:1px solid var(--border); border-radius:var(--radius); padding:.45rem .65rem; font-size:.78rem;">
+              <span style="display:block; color:var(--text-dim); font-size:.65rem; text-transform:uppercase; letter-spacing:.06em;">${s.label}</span>
+              <b style="font-family:var(--f-mono); color:var(--data);">${s.val}</b>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    ${d.checks && d.checks.length ? `
+      <div>
+        <h4 style="font:700 .72rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 .4rem;">INDEPENDENT NUMERICAL CHECKS (${sim.checks})</h4>
+        <div style="display:flex; flex-direction:column; gap:.35rem;">
+          ${d.checks.map(c => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--field); border:1px solid var(--border); border-radius:var(--radius); padding:.38rem .65rem; font-size:.78rem;">
+              <span style="color:var(--text);">${c.title}</span>
+              <span style="font-family:var(--f-mono); font-size:.7rem; color:var(--ok); font-weight:700;">PASS (${c.tol})</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
     <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:.8rem; margin-top:.5rem;">
       <span style="font:500 .7rem/1 var(--f-mono); color:var(--text-dim);">MATERIAL: <b>${sim.material || 'Generic Alloy'}</b></span>
       <button class="wp-btn is-primary" onclick="launchDirect('${sim.id}')">Open Interactive Simulator</button>
@@ -1571,7 +1861,7 @@ function openDossier(id) {
   modal.classList.add("is-open");
 
   if (window.renderMathInElement) {
-    renderMathInElement(content, {
+    window.renderMathInElement(content, {
       delimiters: [
         {left: '$$', right: '$$', display: true},
         {left: '$', right: '$', display: false}
@@ -1607,7 +1897,7 @@ function updateMathPreview(val) {
   }
   preview.innerHTML = `$$${val}$$`;
   if (window.renderMathInElement) {
-    renderMathInElement(preview, {
+    window.renderMathInElement(preview, {
       delimiters: [{left: '$$', right: '$$', display: true}],
       throwOnError: false
     });
@@ -1663,9 +1953,13 @@ async function handleSaveSim(e) {
   document.getElementById("math-live-preview").innerHTML = "Live equation preview will appear here.";
 }
 
-// Delete custom simulation
+// Delete simulation
 function deleteSim(id) {
-  if (!confirm("Are you sure you want to remove this website from your repository?")) return;
+  const isCore = DEFAULT_SIMULATIONS.some(s => s.id === id);
+  const msg = isCore
+    ? "This is a core simulation unit. Remove from active catalog view? (You can restore it anytime with 'RESTORE CORE'.)"
+    : "Are you sure you want to remove this website from your repository?";
+  if (!confirm(msg)) return;
   simulations = simulations.filter(s => s.id !== id);
   saveLibrary();
   renderCards();

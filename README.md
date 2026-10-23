@@ -2,7 +2,7 @@
 
 > **Retro Sci-Fi Operations Archive & Interactive Mechanical Engineering Simulation Catalog**
 
-A browser-native repository dashboard built in the **webpmesim** retro-futuristic CAD/CRT aesthetic (inspired by NERV / Evangelion tactical command consoles, vintage vector monitors, and engineering blueprints). It indexes, categorizes, stores, inspects, and launches standalone HTML physics & engineering simulations locally without external backend dependencies.
+webpmesim-library(Website Physics Math Engineering Simulator Library) A browser-native repository dashboard built in the **webpmesim** retro-futuristic CAD/CRT aesthetic (inspired by retro crt tactical command consoles, vintage vector monitors, and engineering blueprints). It indexes, categorizes, stores, inspects, and launches standalone HTML physics & engineering simulations locally without external backend dependencies.
 
 Live deployment: **[https://spocku.github.io/webpmesim-library/](https://spocku.github.io/webpmesim-library/)**
 

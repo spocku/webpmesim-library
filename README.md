@@ -34,7 +34,7 @@ Switch between themes instantly via the top telemetry HUD:
 
 
 ### Pre-Installed Core Simulation Units
-The repository includes three high-fidelity physics & engineering simulation models ready to run out of the box.
+The repository includes mechanical systems with high-fidelity physics & engineering simulation ready to run out of the box.
 ---
 
 ## Live Demo & Quick Start

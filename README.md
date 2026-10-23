@@ -10,23 +10,23 @@ Live deployment: **[https://spocku.github.io/webpmesim-library/](https://spocku.
 
 ## Features
 
-### 🖥️ Three Retro-Futuristic Themes
+### Three Retro-Futuristic Themes
 Switch between themes instantly via the top telemetry HUD:
 - **CRT Mode**: Deep phosphor amber/orange glow, CRT scanlines, sweep bar, noise grain, corner reticles, and monospaced typography.
 - **Blueprint Mode**: Cyan / dark slate vector wireframes with architectural graph grid overlays.
 - **White / Technical Print Mode**: Clean daytime engineering document aesthetic with high contrast.
 
-### 📦 Local-First Storage & Offline Operation
+###  Local-First Storage & Offline Operation
 - **IndexedDB**: Stores complete standalone HTML simulation bundles for persistent offline execution.
 - **LocalStorage**: Retains catalog metadata, dossiers, search state, and UI theme preferences.
 - **Zero Server Overhead**: The entire platform runs statically inside client browsers—compatible with GitHub Pages, local file links, or static hosting.
 
-### 🔬 Engineering Dossiers & Mathematical Typesetting
+###  Engineering Dossiers & Mathematical Typesetting
 - **KaTeX Integration**: Renders mathematical equations and physical governing relations ($$x(\theta)$$, $$\sigma = \frac{F}{A}$$, slider-crank position formulas, Wankel epitrochoids, etc.) with real-time math previews.
 - **Interactive Dossier Modal**: Inspect component breakdowns, material specs, kinematic degrees of freedom, and mechanical schematics.
 - **In-App Runner & Pop-Out Mode**: Run simulations directly inside an embedded CRT modal runner or open full-screen in a detached window.
 
-### ⚡ Catalog Management
+###  Catalog Management
 - **Batch HTML Import**: Drag and drop or upload multiple `.html` / `.htm` standalone webpmesim simulations at once. The engine automatically parses titles, subtitles, formulas, and metadata tags from the files.
 - **Real-Time Search & Filtering**: Instant search across titles, scope descriptions, and KaTeX mathematical formulas (press `/` to focus search).
 - **JSON Catalog Export & Import**: Backup or sync catalog databases across machines with a single click.

@@ -1291,6 +1291,69 @@ const DEFAULT_SIMULATIONS = [
         { title: "Primary pitching couple dynamic balance (moment equilibrium)", tol: "1e-6 N·m" }
       ]
     }
+  },
+  {
+    id: "gas-turbine",
+    title: "Single-Spool Gas Turbine",
+    subtitle: "Open Brayton cycle, 8-stage axial compressor, annular combustor and 3-stage axial turbine on one shaft",
+    category: "engines",
+    url: "gas-turbine-webpmesim/gas-turbine-webpmesim.html",
+    fileUrl: "C:/Users/bharh/Desktop/projects/webpmesim/gas-turbine-webpmesim/gas-turbine-webpmesim.html",
+    scope: "The steady open Brayton cycle of a single-spool gas turbine with constant specific heats, its stage temperatures, work, efficiency and fuel flow, and the centrifugal root stress of its rotating blades.",
+    equation: "\\eta_{\\text{th}} = \\frac{W_t - W_c}{\\dot m\\, f\\, \\eta_b\\, \\text{LHV}}",
+    parts: 10,
+    checks: "15/15 PASS",
+    material: "Ti-6Al-4V / NiCr20TiAl / 42CrMo4",
+    solver: "Brayton Cycle & Rotor Stress",
+    date: "2026-10-26",
+    tags: ["gas-turbine", "brayton", "thermodynamics", "compressor", "turbine", "combustion", "blade-stress", "power"],
+    svg: `<svg viewBox="0 0 240 110" class="wp-schematic-svg">
+      <line x1="10" y1="55" x2="230" y2="55" stroke="var(--rule)" stroke-width="1" stroke-dasharray="4 3"/>
+      <path d="M 20,20 L 60,30 L 110,38 L 110,72 L 60,80 L 20,90 Z" fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="1.8"/>
+      <rect x="112" y="28" width="38" height="54" fill="rgba(255,69,0,0.15)" stroke="var(--wire-2, var(--accent))" stroke-width="1.8"/>
+      <path d="M 152,38 L 190,30 L 225,22 L 225,88 L 190,80 L 152,72 Z" fill="var(--panel-2)" stroke="var(--wire-1)" stroke-width="1.8"/>
+      <line x1="20" y1="55" x2="225" y2="55" stroke="var(--geo)" stroke-width="3"/>
+      <circle cx="131" cy="44" r="3" fill="var(--alert)"/>
+      <circle cx="131" cy="66" r="3" fill="var(--alert)"/>
+      <text x="60" y="104" fill="var(--text-dim)" font-size="7.5" font-family="var(--f-mono)" text-anchor="middle">COMPRESSOR 1-2</text>
+      <text x="131" y="104" fill="var(--data)" font-size="7.5" font-family="var(--f-mono)" text-anchor="middle">2-3</text>
+      <text x="190" y="104" fill="var(--text-dim)" font-size="7.5" font-family="var(--f-mono)" text-anchor="middle">TURBINE 3-4</text>
+      <text x="230" y="14" fill="var(--geo)" font-size="7.5" font-family="var(--f-mono)" text-anchor="end">BRAYTON CYCLE</text>
+    </svg>`,
+    dossier: {
+      overview: "Thermodynamic and structural simulation of a single-spool industrial gas turbine. Solves the open Brayton cycle with compressor and turbine isentropic efficiencies, separate air and combustion-product properties and a fuel-air ratio from the combustor energy balance; reports station temperatures, compressor, turbine and net power, heat input and rejection, thermal efficiency, specific fuel consumption and work ratio; and computes the centrifugal root stress and tip speed of the rotating blades. The 3D model shows twisted blade rows, combustor flames that track turbine inlet temperature, and colour-coded gas-path flow.",
+      math: [
+        { title: "Isentropic Compression", tex: "T_{2s} = T_1\\, r_c^{(\\gamma_c-1)/\\gamma_c},\\quad T_2 = T_1 + \\frac{T_{2s}-T_1}{\\eta_c}" },
+        { title: "Isentropic Expansion", tex: "T_{4s} = T_3\\, r_c^{-(\\gamma_g-1)/\\gamma_g},\\quad T_4 = T_3 - \\eta_t (T_3 - T_{4s})" },
+        { title: "Fuel-Air Ratio", tex: "f = \\frac{c_{pg}T_3 - c_{pc}T_2}{\\eta_b\\,\\text{LHV} - c_{pg}T_3}" },
+        { title: "Net Power", tex: "W_{\\text{net}} = \\dot m (1+f) c_{pg}(T_3-T_4) - \\dot m\\, c_{pc}(T_2-T_1)" },
+        { title: "Ideal Brayton Efficiency", tex: "\\eta_{\\text{ideal}} = 1 - r_c^{-(\\gamma-1)/\\gamma}" },
+        { title: "Blade Root Centrifugal Stress", tex: "\\sigma = \\tfrac12 \\rho\\, \\omega^2 (r_t^2 - r_h^2)" }
+      ],
+      applications: [
+        "Industrial power generation: net shaft power drives an electrical generator.",
+        "Mechanical drive of pumps and pipeline compressors.",
+        "Aircraft propulsion cores supplying jet or shaft power.",
+        "Cycle design studies: trading pressure ratio against turbine inlet temperature."
+      ],
+      specs: [
+        { label: "Pressure Ratio (r_c)", val: "2 – 40 (default 14)" },
+        { label: "Turbine Inlet Temp. (T3)", val: "900 – 1,750 K (default 1,400 K)" },
+        { label: "Air Mass Flow", val: "5 – 80 kg/s (default 30 kg/s)" },
+        { label: "Shaft Speed (N)", val: "1,000 – 15,000 rpm (default 9,000 rpm)" },
+        { label: "Component Efficiencies", val: "η_c 0.70 – 0.95, η_t 0.70 – 0.96" },
+        { label: "Design Point Output", val: "≈ 9.8 MW at 33.6 % thermal efficiency" }
+      ],
+      checks: [
+        { title: "First law: Q_in = W_net + Q_out", tol: "1e-6 kW" },
+        { title: "Ideal limit reproduces Brayton efficiency", tol: "1e-12" },
+        { title: "Isentropic compression and expansion have zero entropy change", tol: "1e-12 kJ/(kg·K)" },
+        { title: "Second law and Carnot bound satisfied", tol: "1e-12" },
+        { title: "Compressor work equals integral of v dp", tol: "1e-6 kJ/kg" },
+        { title: "Blade stress equals integrated body force", tol: "1e-9 MPa" },
+        { title: "Combustor energy and mass balances close", tol: "1e-6 kW" }
+      ]
+    }
   }
 ];
 
